@@ -54,6 +54,7 @@ function render() {
       {
         type: 'line',
         smooth: true,
+        connectNulls: false,
         showSymbol: false,
         lineStyle: {
           width: 2,

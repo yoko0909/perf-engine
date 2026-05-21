@@ -62,10 +62,10 @@ onMounted(() => {
   <main class="page">
     <section class="page__hero">
       <div>
-        <p class="page__eyebrow">Android QA Perf</p>
-        <h1>单页性能观测台</h1>
+        <p class="page__eyebrow">PerfEngine</p>
+        <h1>Mobile Performance Monitor</h1>
       </div>
-      <p class="page__caption">单设备、单应用、单会话。所有状态都收进同一屏。</p>
+      <p class="page__caption">Collect Android and iOS app performance signals from one desktop workflow.</p>
     </section>
 
     <ToolbarPanel
@@ -105,9 +105,7 @@ onMounted(() => {
   display: grid;
   gap: 18px;
   padding: 28px;
-  background:
-    radial-gradient(circle at top right, rgba(226, 241, 243, 0.9), transparent 28%),
-    linear-gradient(180deg, #edf5f4, #f7faf9 44%, #eef2f7);
+  background: #f7faf9;
   color: #0f172a;
 }
 
@@ -127,12 +125,12 @@ onMounted(() => {
   margin-bottom: 8px;
   color: #0f766e;
   font-size: 12px;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
 }
 
 .page__caption {
-  max-width: 320px;
+  max-width: 360px;
   color: #475569;
 }
 

@@ -1,0 +1,11 @@
+__pycache__
+*.pyc
+
+# Local test/build outputs
+.pytest-tmp/
+ui/dist/
+ui/node_modules/
+
+# Local reference checkout/symlink and device-generated files
+Perftool_Demo
+selfIdentity.plist

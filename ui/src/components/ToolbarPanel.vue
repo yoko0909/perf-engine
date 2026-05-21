@@ -21,7 +21,7 @@ defineEmits<{
 
 <template>
   <section class="toolbar">
-    <button class="toolbar__button" type="button" @click="$emit('refresh')">刷新设备</button>
+    <button class="toolbar__button" type="button" @click="$emit('refresh')">Refresh</button>
 
     <select
       class="toolbar__select"
@@ -29,9 +29,9 @@ defineEmits<{
       :value="selectedDeviceId ?? ''"
       @change="$emit('selectDevice', ($event.target as HTMLSelectElement).value)"
     >
-      <option value="">请选择设备</option>
+      <option value="">Select device</option>
       <option v-for="device in devices" :key="device.device_id" :value="device.device_id">
-        {{ device.display_name }} ({{ device.device_id }})
+        [{{ device.platform }}] {{ device.display_name }} ({{ device.device_id }})
       </option>
     </select>
 
@@ -41,7 +41,7 @@ defineEmits<{
       :value="selectedPackage ?? ''"
       @change="$emit('selectPackage', ($event.target as HTMLSelectElement).value)"
     >
-      <option value="">请选择应用</option>
+      <option value="">Select app</option>
       <option v-for="app in apps" :key="app.package_name" :value="app.package_name">
         {{ app.display_name }}
       </option>
@@ -54,7 +54,7 @@ defineEmits<{
       :disabled="!selectedDeviceId || !selectedPackage"
       @click="$emit('start')"
     >
-      开始采集
+      Start
     </button>
     <button
       v-else
@@ -62,7 +62,7 @@ defineEmits<{
       type="button"
       @click="$emit('stop')"
     >
-      停止采集
+      Stop
     </button>
   </section>
 </template>
@@ -78,7 +78,7 @@ defineEmits<{
 .toolbar__button,
 .toolbar__select {
   min-height: 42px;
-  border-radius: 12px;
+  border-radius: 8px;
   border: 1px solid #c8d1dc;
   background: #ffffff;
   font-size: 14px;

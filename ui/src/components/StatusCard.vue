@@ -1,53 +1,59 @@
 <script setup lang="ts">
+import { computed } from 'vue'
+
 import type { PhoneStatus, SessionState } from '../types'
 
-defineProps<{
+const props = defineProps<{
   session: SessionState
   status: PhoneStatus | null
   errorMessage: string
 }>()
+
+const message = computed(() => {
+  return props.errorMessage || props.status?.status_notice || props.session.message || props.session.phase
+})
 </script>
 
 <template>
   <section class="status-card">
     <div class="status-card__header">
-      <h2>当前状态</h2>
+      <h2>Session Status</h2>
       <p class="status-card__message">
-        {{ errorMessage || session.message || session.phase }}
+        {{ message }}
       </p>
     </div>
 
     <div class="status-card__grid">
       <article>
-        <span>设备</span>
-        <strong>{{ status?.device_label || '未选择设备' }}</strong>
+        <span>Device</span>
+        <strong>{{ status?.device_label || 'No device selected' }}</strong>
       </article>
       <article>
-        <span>连接</span>
+        <span>Connection</span>
         <strong>{{ status?.connection_state || 'unknown' }}</strong>
       </article>
       <article>
-        <span>屏幕</span>
+        <span>Screen</span>
         <strong>{{ status?.screen_state || 'unknown' }}</strong>
       </article>
       <article>
-        <span>应用</span>
+        <span>App</span>
         <strong>{{ status?.app_state || 'not_selected' }}</strong>
       </article>
       <article>
-        <span>电量</span>
-        <strong>{{ status?.battery_level ?? '未知' }}</strong>
+        <span>Battery</span>
+        <strong>{{ status?.battery_level ?? 'unknown' }}</strong>
       </article>
       <article>
-        <span>温度</span>
-        <strong>{{ status?.temperature_c ?? '未知' }}</strong>
+        <span>Temperature</span>
+        <strong>{{ status?.temperature_c ?? 'unknown' }}</strong>
       </article>
       <article>
-        <span>最近刷新</span>
-        <strong>{{ status?.last_updated_at || '未开始' }}</strong>
+        <span>Updated</span>
+        <strong>{{ status?.last_updated_at || 'unknown' }}</strong>
       </article>
       <article>
-        <span>会话阶段</span>
+        <span>Phase</span>
         <strong>{{ session.phase }}</strong>
       </article>
     </div>
@@ -60,8 +66,8 @@ defineProps<{
   gap: 18px;
   padding: 20px;
   border: 1px solid #d8dee6;
-  border-radius: 18px;
-  background: linear-gradient(160deg, #ffffff, #f4f8fb);
+  border-radius: 8px;
+  background: #ffffff;
 }
 
 .status-card__header {
@@ -90,7 +96,7 @@ defineProps<{
   display: grid;
   gap: 6px;
   padding: 14px;
-  border-radius: 14px;
+  border-radius: 8px;
   background: rgba(230, 240, 245, 0.72);
 }
 

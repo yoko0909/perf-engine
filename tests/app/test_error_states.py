@@ -76,7 +76,7 @@ def test_no_device_returns_operator_message():
     devices = service.list_devices()
 
     assert devices == []
-    assert service.state.message == "未检测到 Android 设备"
+    assert service.state.message == "No supported devices were detected."
 
 
 def test_waiting_for_data_keeps_running_state():
@@ -90,7 +90,7 @@ def test_waiting_for_data_keeps_running_state():
     snapshot = service.get_live_snapshot()
 
     assert snapshot.session.phase is SessionPhase.RUNNING
-    assert snapshot.session.message == "等待设备数据中"
+    assert snapshot.session.message == "Waiting for device data."
 
 
 def test_device_disconnect_interrupts_session():
@@ -104,7 +104,7 @@ def test_device_disconnect_interrupts_session():
     snapshot = service.get_live_snapshot()
 
     assert snapshot.session.phase is SessionPhase.INTERRUPTED
-    assert snapshot.session.message == "设备已断开"
+    assert snapshot.session.message == "Device disconnected during collection."
 
 
 def test_app_exit_interrupts_session():
@@ -118,4 +118,4 @@ def test_app_exit_interrupts_session():
     snapshot = service.get_live_snapshot()
 
     assert snapshot.session.phase is SessionPhase.INTERRUPTED
-    assert snapshot.session.message == "目标应用已退出"
+    assert snapshot.session.message == "Target application exited during collection."

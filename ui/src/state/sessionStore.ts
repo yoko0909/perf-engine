@@ -8,6 +8,7 @@ const defaultSession: SessionState = {
   selected_package: null,
   selectors_locked: false,
   message: '',
+  platform: null,
 }
 
 export interface SessionApi {
@@ -37,11 +38,7 @@ export function createSessionStore(api: SessionApi) {
 
   async function refreshDevices() {
     state.devices = await api.listDevices()
-    if (state.devices.length === 0) {
-      state.errorMessage = '未检测到 Android 设备'
-    } else {
-      state.errorMessage = ''
-    }
+    state.errorMessage = state.devices.length === 0 ? 'No supported devices were detected.' : ''
   }
 
   async function loadApps(deviceId: string) {
@@ -50,11 +47,32 @@ export function createSessionStore(api: SessionApi) {
       ...state.session,
       selected_device_id: deviceId,
       selected_package: null,
+      platform: state.devices.find((device) => device.device_id === deviceId)?.platform ?? null,
     }
   }
 
   async function start(deviceId: string, packageName: string) {
-    state.session = await api.startSession(deviceId, packageName)
+    state.session = {
+      ...state.session,
+      phase: 'starting',
+      selected_device_id: deviceId,
+      selected_package: packageName,
+      selectors_locked: true,
+      message: 'Starting collection.',
+    }
+    state.errorMessage = ''
+    try {
+      state.session = await api.startSession(deviceId, packageName)
+    } catch (error) {
+      state.session = {
+        ...state.session,
+        phase: 'error',
+        selectors_locked: false,
+        message: 'Collection could not be started.',
+      }
+      state.errorMessage = error instanceof Error ? error.message : state.session.message
+      return
+    }
     state.errorMessage = state.session.phase === 'error' ? state.session.message : ''
     if (state.session.phase === 'running') {
       await pollOnce()
@@ -76,7 +94,7 @@ export function createSessionStore(api: SessionApi) {
       return
     }
     if (state.session.phase === 'running') {
-      state.errorMessage = ''
+      state.errorMessage = state.snapshot.status.status_notice || ''
     }
   }
 

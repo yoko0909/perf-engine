@@ -67,7 +67,7 @@ def test_start_session_failure_returns_error_state():
 
     assert state.phase is SessionPhase.ERROR
     assert state.selectors_locked is False
-    assert state.message == "采集启动失败，请重试"
+    assert state.message == "Collection could not be started."
 
 
 def test_stop_session_restores_setup_controls():
@@ -82,4 +82,4 @@ def test_stop_session_restores_setup_controls():
 
     assert state.phase is SessionPhase.STOPPED
     assert state.selectors_locked is False
-    assert state.message == "已停止"
+    assert state.message == "Collection stopped."

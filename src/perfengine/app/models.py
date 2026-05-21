@@ -20,11 +20,17 @@ class SessionPhase(str, Enum):
     ERROR = "error"
 
 
+class Platform(str, Enum):
+    ANDROID = "android"
+    IOS = "ios"
+
+
 @dataclass(slots=True)
 class DeviceInfo:
     device_id: str
     display_name: str
     connection_type: str = "usb"
+    platform: Platform = Platform.ANDROID
 
 
 @dataclass(slots=True)
@@ -32,6 +38,7 @@ class AppInfo:
     package_name: str
     display_name: str
     pid: int | None = None
+    platform: Platform = Platform.ANDROID
 
 
 @dataclass(slots=True)
@@ -41,16 +48,19 @@ class SessionState:
     selected_package: str | None = None
     selectors_locked: bool = False
     message: str = ""
+    platform: Platform | None = None
 
 
 @dataclass(slots=True)
 class PhoneStatus:
+    platform: Platform | None = None
     connection_state: str = "disconnected"
     device_label: str = ""
     screen_state: str = "unknown"
     app_state: str = "not_selected"
     battery_level: int | None = None
     temperature_c: float | None = None
+    status_notice: str = ""
     last_updated_at: str = field(default_factory=utc_now_iso)
 
 
