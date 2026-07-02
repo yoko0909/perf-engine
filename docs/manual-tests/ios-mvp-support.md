@@ -11,9 +11,21 @@
 ## 工具链依赖
 
 - [ ] 验证用户本机不需要预先安装 `go-ios`、`sib` 或 `pymobiledevice` CLI。
-- [ ] 验证工具包内存在 `assets/ios/ios.exe`。
-- [ ] 验证工具包内存在 `assets/ios/sib.exe`。
-- [ ] 验证从普通终端启动 PerfEngine 时，iOS 设备发现不依赖用户 PATH。
+- [ ] 验证 iOS 设备发现、App 列表和 iOS 17+ tunnel 均通过打包内 Python 依赖 `pymobiledevice3` 工作，不依赖 `assets/ios/ios.exe` 或 `assets/ios/sib.exe`。
+- [ ] 验证从普通终端启动 PerfEngine 时，iOS 设备发现不依赖用户 PATH 中的外部 iOS CLI。
+
+## pymobiledevice3 9.0.0 基线
+
+- [x] Windows 环境需要 `pywin32`；缺少时 `pymobiledevice3.lockdown` 会因为 `win32security` 缺失而导入失败。
+- [x] `pymobiledevice3==9.0.0` 已验证可以导入 `pymobiledevice3.lockdown` 和 `win32security`。
+- [x] 9.0.0 的核心 API 是 async：`usbmux.list_devices`、`create_using_usbmux`、service `connect()`、`get_apps()`、`get_battery()`、DVT 调用均需要 await。
+- [x] 9.0.0 使用 `DvtProvider` 作为 DVT 入口；Demo 4.2.3 的 `DvtSecureSocketProxyService` 路径不可用。
+- [x] 当前 USB 真机 baseline：UDID `00008110-000E699901A2801E`，ProductVersion `15.0`，ProductType `iPhone14,5`。
+- [x] 已验证 `InstallationProxyService.get_apps('User')` 可返回用户 App 列表。
+- [x] 已验证 `DiagnosticsService.get_battery()` 可返回 `CurrentCapacity`、`Voltage`、`InstantAmperage`、`Temperature` 等字段。
+- [x] 已验证 `DvtProvider + ProcessControl` 可查询目标 App PID。
+- [x] 已验证 `Sysmontap.create(dvt)` 可返回目标进程 row，包含 `physFootprint`、`memResidentSize`、`cpuTotalUser`、`cpuTotalSystem` 等字段。
+- [ ] CoreProfile/FPS 仅确认能返回原始 bytes；Demo 的 `code == 830472984` 事件码在当前样本中未命中，仍需单独确认 FPS 来源。
 
 ## 主流程
 
@@ -49,32 +61,30 @@
 - [ ] App 退出后轮询停止，selector 恢复可操作。
 - [ ] 重新启动目标 App 后可以再次 Start。
 - [ ] 未信任电脑时，PerfEngine 显示需要解锁 iPhone 并信任电脑的提示。
-- [ ] 缺少内置 iOS 工具时，PerfEngine 显示工具包缺失提示，而不是 Python/Node 栈信息。
+- [ ] 缺少 `pymobiledevice3` 或 Windows `pywin32` 支持时，PerfEngine 显示工具包缺失提示，而不是 Python/Node 栈信息。
 
 ## 指标观察记录
 
 | 指标 | 期望口径 | 真机观察结果 | 备注 |
 | --- | --- | --- | --- |
-| FPS | iOS FPS collector 或 CoreAnimation FPS | 暂无真实数据 | `sib perfmon -u <udid> -b <bundleId> --fps ... -j -r 1000` 当前返回 `InvalidService`。 |
+| FPS | iOS FPS collector 或 CoreAnimation FPS | 暂无真实数据 | CoreProfile 原始 bytes 可返回，但 Demo 的 `830472984` 事件码尚未命中。 |
 | Frame Time | 优先逐帧数据；没有逐帧数据时使用 `1000 / FPS` | 暂无真实数据 | 依赖 FPS 或逐帧数据源；当前同样被 `InvalidService` 阻塞。 |
-| App CPU | 目标 App 进程 CPU | 暂无真实数据 | 依赖 iOS 性能服务；当前 `sib perfmon` 无法启动。 |
-| Total CPU | 系统总 CPU | 暂无真实数据 | 依赖 iOS 性能服务；当前 `sib perfmon` 无法启动。 |
+| App CPU | 目标 App 进程 CPU | 暂无真实数据 | 通过 `pymobiledevice3` DVT/Sysmontap 读取。 |
+| Total CPU | 系统总 CPU | 暂无真实数据 | 通过 `pymobiledevice3` DVT/Sysmontap 读取。 |
 | Memory | `physFootprint`，不使用 virtual memory 替代 | 暂无真实数据 | 需要从 system/perfmon/DVT 数据中确认字段来源。 |
-| Temperature | battery temperature；单位未确认时允许为空 | `sib battery` 可返回原始电池字段 | 已观察到 `CurrentCapacity`、`Voltage`、`Temperature` 等字段；温度单位仍需确认，未确认前 UI 不应伪造成有效摄氏度。 |
+| Temperature | battery temperature；单位未确认时允许为空 | `pymobiledevice3` Diagnostics 可返回原始电池字段 | 已观察到 `CurrentCapacity`、`Voltage`、`Temperature` 等字段；温度单位仍需确认，未确认前 UI 不应伪造成有效摄氏度。 |
 
 ## 当前真机验证结果
 
-- [x] 工具包内已存在 `assets/ios/ios.exe` 和 `assets/ios/sib.exe`。
-- [x] `ios.exe list --details` 可以发现 iPhone；输出中会先出现 go-ios agent/tunnel warning，再返回 `deviceList`。
-- [x] 设备下拉框可以显示 iPhone。
-- [x] `sib.exe app list -u <udid> -j` 可以返回用户 App 列表，且 PerfEngine 的 App 下拉框已经可以显示 App。
+- [ ] `pymobiledevice3.usbmux.list_devices()` 可以发现 iPhone。
+- [ ] 设备下拉框可以显示 iPhone。
+- [ ] `pymobiledevice3` `InstallationProxyService.get_apps('User')` 可以返回用户 App 列表，且 PerfEngine 的 App 下拉框可以显示 App。
+- [ ] iOS 17+ 设备需要 tunnel 时，PerfEngine 可通过进程内 `pymobiledevice3.tunneld.server.TunneldRunner` 启动 tunnel。
 - [x] 点击 Start 后 UI 有响应，Session 可以进入 running/等待数据状态。
 - [ ] 点击 Start 后真实性能采集尚未可用，Session Status 仍显示 `Waiting for ios data.`。
 - [ ] FPS、Frame Time、App CPU、Total CPU、Memory 图表当前为空。
 - [ ] 目标 App 状态当前不会随 App 退出/不可采集而变化。
-- [ ] `sib.exe ps -u <udid>` 当前返回 `InvalidService`，提示可使用 `sib mount` 修复。
-- [ ] `sib.exe mount -u <udid>` 当前尝试下载 Developer Disk Image 失败。
-- [ ] 需要先解决 Developer Disk Image/DDI 或 DVT 服务可用性，再继续接入真实 perf collector。
+- [ ] 若 DVT 服务不可用，需要记录 `pymobiledevice3` 返回的 operator-safe 错误，并确认 UI 不暴露原始 traceback。
 
 ## 验收分工
 

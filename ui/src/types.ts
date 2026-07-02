@@ -15,6 +15,7 @@ export interface DeviceInfo {
   display_name: string
   connection_type: string
   platform: Platform
+  os_version: string | null
 }
 
 export interface AppInfo {

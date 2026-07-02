@@ -7,7 +7,15 @@ describe('ToolbarPanel', () => {
   it('disables selectors while running and shows the stop button', () => {
     const wrapper = mount(ToolbarPanel, {
       props: {
-        devices: [{ device_id: 'SERIAL1', display_name: 'Pixel 8', connection_type: 'usb', platform: 'android' }],
+        devices: [
+          {
+            device_id: 'SERIAL1',
+            display_name: 'Pixel 8',
+            connection_type: 'usb',
+            platform: 'android',
+            os_version: null,
+          },
+        ],
         apps: [{ package_name: 'com.demo.app', display_name: 'com.demo.app', pid: null, platform: 'android' }],
         selectedDeviceId: 'SERIAL1',
         selectedPackage: 'com.demo.app',
@@ -27,8 +35,20 @@ describe('ToolbarPanel', () => {
     const wrapper = mount(ToolbarPanel, {
       props: {
         devices: [
-          { device_id: 'SERIAL1', display_name: 'Pixel 8', connection_type: 'usb', platform: 'android' },
-          { device_id: 'UDID1', display_name: 'QA iPhone', connection_type: 'usb', platform: 'ios' },
+          {
+            device_id: 'SERIAL1',
+            display_name: 'Pixel 8',
+            connection_type: 'usb',
+            platform: 'android',
+            os_version: null,
+          },
+          {
+            device_id: 'UDID1',
+            display_name: 'QA iPhone',
+            connection_type: 'usb',
+            platform: 'ios',
+            os_version: '15.0',
+          },
         ],
         apps: [],
         selectedDeviceId: null,

@@ -8,6 +8,7 @@ from perfengine.android.status_provider import StatusProvider
 from perfengine.app.models import Platform
 from perfengine.app.platforms import PlatformRegistry
 from perfengine.app.service import PerfToolService
+from perfengine.diagnostics import configure_logging
 from perfengine.ios.app_provider import IOSAppProvider
 from perfengine.ios.client import IOSClient
 from perfengine.ios.device_provider import IOSDeviceProvider
@@ -57,6 +58,7 @@ def build_service(
 
 
 def build_application() -> BridgeApi:
+    configure_logging()
     return BridgeApi(build_service())
 
 

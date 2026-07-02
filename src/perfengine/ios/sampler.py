@@ -13,8 +13,8 @@ class IOSSampler:
         self.timestamp_factory = timestamp_factory
         self._active_session: tuple[str, str] | None = None
 
-    def begin(self, device_id: str, package_name: str) -> None:
-        self.ios_client.prepare(device_id)
+    def begin(self, device_id: str, package_name: str, *, os_version: str | None = None) -> None:
+        self.ios_client.prepare(device_id, os_version=os_version)
         status = self._status(device_id, package_name)
         if status.connection_state != "connected":
             raise OperatorError(
@@ -40,9 +40,15 @@ class IOSSampler:
         if status.connection_state != "connected" or status.app_state != "running":
             return status, None
 
-        fps_sample = self.ios_client.read_fps_sample(device_id, package_name)
-        system_sample = self.ios_client.read_system_sample(device_id, package_name)
-        battery_sample = self.ios_client.read_battery_sample(device_id)
+        try:
+            fps_sample = self.ios_client.read_fps_sample(device_id, package_name)
+            system_sample = self.ios_client.read_system_sample(device_id, package_name)
+            battery_sample = self.ios_client.read_battery_sample(device_id)
+        except OperatorError:
+            status = self._status(device_id, package_name)
+            if status.connection_state == "connected" and status.app_state == "running":
+                status.status_notice = "Some iOS metrics are unavailable."
+            return status, None
         point = normalize_ios_metric_point(
             timestamp=self.timestamp_factory(),
             fps_sample=fps_sample,

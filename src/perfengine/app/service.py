@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from perfengine.app.errors import OperatorError
 from perfengine.app.models import (
+    DeviceInfo,
     LiveSnapshot,
     PhoneStatus,
     Platform,
@@ -28,7 +29,7 @@ class PerfToolService:
         self.history = []
         self.status = PhoneStatus()
         self.state = SessionState(phase=SessionPhase.IDLE)
-        self._devices_by_id: dict[str, str] = {}
+        self._devices_by_id: dict[str, DeviceInfo] = {}
 
     def list_devices(self):
         self.state = SessionState(
@@ -51,7 +52,7 @@ class PerfToolService:
             )
             return []
 
-        self._devices_by_id = {item.device_id: item.display_name for item in devices}
+        self._devices_by_id = {item.device_id: item for item in devices}
         if not devices:
             self.status = PhoneStatus()
             self.state = SessionState(
@@ -99,7 +100,7 @@ class PerfToolService:
         for app in apps:
             if platform is not None:
                 app.platform = platform
-        self.status.device_label = self._devices_by_id.get(device_id, device_id)
+        self.status.device_label = self._device_label(device_id)
         self.status.platform = platform
         self.state = SessionState(
             phase=SessionPhase.IDLE,
@@ -121,10 +122,14 @@ class PerfToolService:
             message="Starting collection.",
             platform=platform,
         )
-        self.status.device_label = self._devices_by_id.get(device_id, device_id)
+        self.status.device_label = self._device_label(device_id)
         self.status.platform = platform
         try:
-            self._collector_for(device_id).begin(device_id, package_name)
+            os_version = self._device_os_version(device_id)
+            if os_version:
+                self._collector_for(device_id).begin(device_id, package_name, os_version=os_version)
+            else:
+                self._collector_for(device_id).begin(device_id, package_name)
         except OperatorError as exc:
             self.state = SessionState(
                 phase=SessionPhase.ERROR,
@@ -211,9 +216,8 @@ class PerfToolService:
 
         self.status = status
         self.status.platform = self.status.platform or self.state.platform
-        self.status.device_label = self.status.device_label or self._devices_by_id.get(
-            self.state.selected_device_id or "",
-            self.state.selected_device_id or "",
+        self.status.device_label = self.status.device_label or self._device_label(
+            self.state.selected_device_id or ""
         )
 
         if status.connection_state != "connected":
@@ -279,3 +283,11 @@ class PerfToolService:
         if self.platform_registry is not None and device_id is not None:
             return self.platform_registry.collector_for_device(device_id)
         return self.collector
+
+    def _device_label(self, device_id: str) -> str:
+        device = self._devices_by_id.get(device_id)
+        return device.display_name if device is not None else device_id
+
+    def _device_os_version(self, device_id: str) -> str | None:
+        device = self._devices_by_id.get(device_id)
+        return device.os_version if device is not None else None

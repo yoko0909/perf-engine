@@ -31,6 +31,7 @@ class DeviceInfo:
     display_name: str
     connection_type: str = "usb"
     platform: Platform = Platform.ANDROID
+    os_version: str | None = None
 
 
 @dataclass(slots=True)

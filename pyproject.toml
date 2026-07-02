@@ -8,7 +8,9 @@ version = "0.1.0"
 description = "Android QA desktop performance MVP"
 requires-python = ">=3.11"
 dependencies = [
+  "pymobiledevice3==9.0.0",
   "pywebview>=5.0",
+  "pywin32>=312; platform_system == 'Windows'",
 ]
 
 [project.optional-dependencies]

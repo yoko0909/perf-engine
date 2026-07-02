@@ -47,6 +47,28 @@ def test_normalize_ios_metric_point_keeps_missing_metrics_null():
     assert point.temperature_c is None
 
 
+def test_normalize_ios_metric_point_accepts_adapter_field_names():
+    point = normalize_ios_metric_point(
+        timestamp="2026-05-07T00:00:00Z",
+        fps_sample={},
+        system_sample={
+            "app_cpu_percent": 25.0,
+            "total_cpu_percent": 60.0,
+            "physFootprint": 125829120,
+            "memory_mb": None,
+        },
+        battery_sample={"battery_level": 88, "temperature_c": None},
+        status=PhoneStatus(),
+    )
+
+    assert point is not None
+    assert point.app_cpu_percent == 25.0
+    assert point.total_cpu_percent == 60.0
+    assert point.memory_mb == 120.0
+    assert point.battery_level == 88
+    assert point.temperature_c is None
+
+
 def test_normalize_ios_metric_point_returns_none_when_all_metrics_are_missing():
     point = normalize_ios_metric_point(
         timestamp="2026-05-07T00:00:00Z",
